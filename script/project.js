@@ -47,7 +47,8 @@ const gameLoop = () => {
   // Load game state from localStorage if available
   if (localStorage.getItem("game_state")) {
     game_state = JSON.parse(localStorage.getItem("game_state"));
-    
+
+    // Ask user if they want to continue with the existing game
     const continue_game = confirm(
       `You have a game in progress. Do you want to continue the game?`
     );
@@ -64,15 +65,17 @@ const gameLoop = () => {
       localStorage.setItem("game_state", JSON.stringify(game_state));
     }
   } else {
-    localStorage.setItem("game_state", JSON.stringify(game_state));
-  }
+    // Only show the welcome prompt if there's no existing game state
+    const ready_to_play = confirm(
+      `Welcome to the Rock Paper Scissors Game. Are you ready to play?`
+    );
+    if (!ready_to_play) {
+      console.log("Game canceled by the user.");
+      return;
+    }
 
-  const ready_to_play = confirm(
-    `Welcome to the Rock Paper Scissors Game. Are you ready to play?`
-  );
-  if (!ready_to_play) {
-    console.log("Game canceled by the user.");
-    return;
+    // Save the initial game state
+    localStorage.setItem("game_state", JSON.stringify(game_state));
   }
 
   while (game_state.currentRound <= game_state.maxRounds) {
@@ -104,9 +107,7 @@ const gameLoop = () => {
       game_state.computerScore++;
     }
 
-    console.log(
-      `You ${result} in round number ${game_state.currentRound}`
-    );
+    console.log(`You ${result} in round number ${game_state.currentRound}`);
     console.log(
       `Current score: \nPlayer: ${game_state.playerScore}\nComputer: ${game_state.computerScore}`
     );
