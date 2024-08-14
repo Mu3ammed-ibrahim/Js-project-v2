@@ -53,46 +53,75 @@ const gameLoop = () => {
   }
 
   while (game_state.currentRound <= game_state.maxRounds) {
-    console.log(
-      `+++++++++++++++++++++++This is round number ${game_state.currentRound}+++++++++++++++++++++++`
+    let player_score = 0;
+    let computer_score = 0;
+
+    const ready_to_play = confirm(
+      `welcome to Rock Paper & Scissors Game are you ready to play ?`
     );
-
-    let playerSelection;
-    let result;
-
-    do {
-      playerSelection = prompt(
-        `Enter your choice for round number ${game_state.currentRound} (Rock, Paper, or Scissor)`
+    if (!ready_to_play) {
+      console.log("Game canceled by the user.");
+      return;
+    }
+    //start of the game loop
+    for (let i = 1; i <= 5; i++) {
+      console.log(
+        `+++++++++++++++++++++++This is round number ${game_state.currentRound}+++++++++++++++++++++++`
       );
-      result = Round(computerPlay(), playerSelection);
 
-      if (result === "invalid") {
-        console.log("Invalid input. Please enter Rock, Paper, or Scissor.");
+      let playerSelection;
+      let result;
+
+      do {
+        playerSelection = prompt(
+          `Enter your choice for round number ${game_state.currentRound} (Rock, Paper, or Scissor) or press "q" to quit`
+        );
+        if (playerSelection === null || playerSelection.toLowerCase() === "q") {
+          console.log("Game exited by the user.");
+          return;
+        }
+        result = Round(computerPlay(), playerSelection);
+
+        if (result === "invalid") {
+          console.log("Invalid input. Please enter Rock, Paper, or Scissor.");
+        }
+      } while (result === "invalid");
+
+      if (result === "win") {
+        game_state.playerScore++;
+      } else if (result === "lose") {
+        game_state.computerScore++;
       }
-    } while (result === "invalid");
 
-    if (result === "win") {
-      game_state.playerScore++;
-    } else if (result === "lose") {
-      game_state.computerScore++;
+      console.log(
+        `Current score: \nPlayer: ${game_state.playerScore}\nComputer: ${game_state.computerScore}`
+      );
+
+      game_state.currentRound++;
+      localStorage.setItem("game_state", JSON.stringify(game_state));
     }
 
-    console.log(`You ${result} in round number ${game_state.currentRound}`);
+    if (game_state.playerScore > game_state.computerScore) {
+      console.log("Congratulations! You are the overall winner!");
+    } else if (game_state.playerScore < game_state.computerScore) {
+      player_score++;
+    } else if (result === "lose") {
+      computer_score++;
+    }
+    console.log(`You ${result} in round number ${i}`);
     console.log(
-      `Current score: \nPlayer: ${game_state.playerScore}\nComputer: ${game_state.computerScore}`
+      `Current score: \nPlayer: ${player_score}\nComputer: ${computer_score}`
     );
+  } //end of the loop
 
-    game_state.currentRound++;
-    localStorage.setItem("game_state", JSON.stringify(game_state));
-  }
-
+  //final results
   console.log(
-    `Final score - Player: ${game_state.playerScore}, Computer: ${game_state.computerScore}`
+    `Final score - Player: ${player_score}, Computer: ${computer_score}`
   );
-
-  if (game_state.playerScore > game_state.computerScore) {
+  //determine the winner and the loser
+  if (player_score > computer_score) {
     console.log("Congratulations! You are the overall winner!");
-  } else if (game_state.playerScore < game_state.computerScore) {
+  } else if (player_score < computer_score) {
     console.log("Sorry! The computer is the overall winner.");
   } else {
     console.log("It's a tie!");
