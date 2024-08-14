@@ -1,43 +1,34 @@
-//computer play function
 const computerPlay = function () {
-  //array for selection
   const rock_paper_scissors = ["Rock", "Paper", "Scissor"];
-  // array random index for selection
   const computer_pick = Math.floor(Math.random() * rock_paper_scissors.length);
-  //select the random string by the random index
-  const computer_selection = rock_paper_scissors[computer_pick];
-  return computer_selection;
+  return rock_paper_scissors[computer_pick];
 };
 
-// rounds of the game
 const Round = function (computerSelection, playerSelection) {
-  playerSelection = playerSelection.toLowerCase(); // Normalize player input to lowercase
+  playerSelection = playerSelection.toLowerCase();
   let result;
 
   if (playerSelection === "rock") {
-    if (computerSelection === "Scissor") {
-      result = "win";
-    } else if (computerSelection === "Paper") {
-      result = "lose";
-    } else {
-      result = "draw";
-    }
+    result =
+      computerSelection === "Scissor"
+        ? "win"
+        : computerSelection === "Paper"
+        ? "lose"
+        : "draw";
   } else if (playerSelection === "paper") {
-    if (computerSelection === "Rock") {
-      result = "win";
-    } else if (computerSelection === "Scissor") {
-      result = "lose";
-    } else {
-      result = "draw";
-    }
+    result =
+      computerSelection === "Rock"
+        ? "win"
+        : computerSelection === "Scissor"
+        ? "lose"
+        : "draw";
   } else if (playerSelection === "scissor") {
-    if (computerSelection === "Rock") {
-      result = "lose";
-    } else if (computerSelection === "Paper") {
-      result = "win";
-    } else {
-      result = "draw";
-    }
+    result =
+      computerSelection === "Rock"
+        ? "lose"
+        : computerSelection === "Paper"
+        ? "win"
+        : "draw";
   } else {
     result = "invalid";
   }
@@ -45,28 +36,33 @@ const Round = function (computerSelection, playerSelection) {
   return result;
 };
 
-// process structure :
-
-// 1) I must create a function called gameLoop
-// 2) I must make a loop inside the function that itterats 5 times (to play 5 rounds of game)
-// 3) prompt the user input and the computer selection
-// 4)I must call the playRound function inside this loop
-// 5) display the info of each round using console.log and the winner
-
 const gameLoop = () => {
-  let playerScore = 0;
-  let computerScore = 0;
+  let game_state = {
+    playerScore: 0,
+    computerScore: 0,
+    currentRound: 1,
+    maxRounds: 5,
+  };
 
-  for (let i = 1; i <= 5; i++) {
+  // Load game state from localStorage if available
+  if (localStorage.getItem("game_state")) {
+    game_state = JSON.parse(localStorage.getItem("game_state"));
+  } else {
+    // Set initial state if not available
+    localStorage.setItem("game_state", JSON.stringify(game_state));
+  }
+
+  while (game_state.currentRound <= game_state.maxRounds) {
     console.log(
-      `+++++++++++++++++++++++This is round number ${i}+++++++++++++++++++++++`
+      `+++++++++++++++++++++++This is round number ${game_state.currentRound}+++++++++++++++++++++++`
     );
+
     let playerSelection;
     let result;
 
     do {
       playerSelection = prompt(
-        `Enter your choice for round number ${i} (Rock, Paper, or Scissor)`
+        `Enter your choice for round number ${game_state.currentRound} (Rock, Paper, or Scissor)`
       );
       result = Round(computerPlay(), playerSelection);
 
@@ -76,28 +72,34 @@ const gameLoop = () => {
     } while (result === "invalid");
 
     if (result === "win") {
-      playerScore++;
+      game_state.playerScore++;
     } else if (result === "lose") {
-      computerScore++;
+      game_state.computerScore++;
     }
 
-    console.log(`You ${result} in round number ${i}`);
+    console.log(`You ${result} in round number ${game_state.currentRound}`);
     console.log(
-      `Current score: \nPlayer: ${playerScore}\nComputer: ${computerScore}`
+      `Current score: \nPlayer: ${game_state.playerScore}\nComputer: ${game_state.computerScore}`
     );
+
+    game_state.currentRound++;
+    localStorage.setItem("game_state", JSON.stringify(game_state));
   }
 
   console.log(
-    `Final score - Player: ${playerScore}, Computer: ${computerScore}`
+    `Final score - Player: ${game_state.playerScore}, Computer: ${game_state.computerScore}`
   );
 
-  if (playerScore > computerScore) {
+  if (game_state.playerScore > game_state.computerScore) {
     console.log("Congratulations! You are the overall winner!");
-  } else if (playerScore < computerScore) {
+  } else if (game_state.playerScore < game_state.computerScore) {
     console.log("Sorry! The computer is the overall winner.");
   } else {
     console.log("It's a tie!");
   }
+
+  localStorage.removeItem("game_state");
 };
 
+// Start or resume the game
 gameLoop();
