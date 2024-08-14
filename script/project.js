@@ -54,9 +54,14 @@ const Round = function (computerSelection, playerSelection) {
 // 5) display the info of each round using console.log and the winner
 
 const gameLoop = () => {
-  let playerScore = 0;
-  let computerScore = 0;
-
+  let player_score = 0;
+  let computer_score = 0;
+  const ready_to_play = confirm(`welcome to Rock Paper & Scissors Game are you ready to play ?`);
+  if (!ready_to_play) {
+    console.log("Game canceled by the user.");
+    return;
+  }
+  //start of the game loop
   for (let i = 1; i <= 5; i++) {
     console.log(
       `+++++++++++++++++++++++This is round number ${i}+++++++++++++++++++++++`
@@ -66,8 +71,12 @@ const gameLoop = () => {
 
     do {
       playerSelection = prompt(
-        `Enter your choice for round number ${i} (Rock, Paper, or Scissor)`
+        `Enter your choice for round number ${i} (Rock, Paper, or Scissor) or q to exit`
       );
+      if (playerSelection === null || playerSelection.toLowerCase() === 'q') {
+        console.log("Game exited by the user.");
+        return;
+      }
       result = Round(computerPlay(), playerSelection);
 
       if (result === "invalid") {
@@ -76,24 +85,20 @@ const gameLoop = () => {
     } while (result === "invalid");
 
     if (result === "win") {
-      playerScore++;
+      player_score++;
     } else if (result === "lose") {
-      computerScore++;
+      computer_score++;
     }
-
     console.log(`You ${result} in round number ${i}`);
-    console.log(
-      `Current score: \nPlayer: ${playerScore}\nComputer: ${computerScore}`
-    );
-  }
+    console.log( `Current score: \nPlayer: ${player_score}\nComputer: ${computer_score}` );
+  }//end of the loop
 
-  console.log(
-    `Final score - Player: ${playerScore}, Computer: ${computerScore}`
-  );
-
-  if (playerScore > computerScore) {
+  //final results
+  console.log(`Final score - Player: ${player_score}, Computer: ${computer_score}`);
+  //determine the winner and the loser
+  if (player_score > computer_score) {
     console.log("Congratulations! You are the overall winner!");
-  } else if (playerScore < computerScore) {
+  } else if (player_score < computer_score) {
     console.log("Sorry! The computer is the overall winner.");
   } else {
     console.log("It's a tie!");
