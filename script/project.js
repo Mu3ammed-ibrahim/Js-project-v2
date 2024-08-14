@@ -56,6 +56,7 @@ const Round = function (computerSelection, playerSelection) {
 const gameLoop = () => {
   let player_score = 0;
   let computer_score = 0;
+  
   const ready_to_play = confirm(`welcome to Rock Paper & Scissors Game are you ready to play ?`);
   if (!ready_to_play) {
     console.log("Game canceled by the user.");
