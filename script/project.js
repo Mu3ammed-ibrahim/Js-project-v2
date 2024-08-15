@@ -1,13 +1,20 @@
-const computerPlay = function () {
+const sanitizeInput = (input) => {
+  const validChoices = ["rock", "paper", "scissor"];
+  input = input.toLowerCase().trim();
+  return validChoices.includes(input) ? input : "invalid";
+};
+
+const computerPlay = () => {
   const rock_paper_scissors = ["Rock", "Paper", "Scissor"];
   const computer_pick = Math.floor(Math.random() * rock_paper_scissors.length);
   return rock_paper_scissors[computer_pick];
 };
 
-const Round = function (computerSelection, playerSelection) {
-  playerSelection = playerSelection.toLowerCase();
-  let result;
+const Round = (computerSelection, playerSelection) => {
+  playerSelection = sanitizeInput(playerSelection);
+  if (playerSelection === "invalid") return "invalid";
 
+  let result;
   if (playerSelection === "rock") {
     result =
       computerSelection === "Scissor"
@@ -29,33 +36,57 @@ const Round = function (computerSelection, playerSelection) {
         : computerSelection === "Paper"
         ? "win"
         : "draw";
-  } else {
-    result = "invalid";
   }
 
   return result;
 };
 
+const generateSecretKey = () => {
+  const keyPart1 = Math.floor(Math.random() * 1000);
+  const keyPart2 = Math.floor(new Date().getTime() % 1000);
+  return keyPart1.toString() + keyPart2.toString();
+};
+
 const encryptGameState = (gameState, key) => {
   const encryptedGameState = {};
-  Object.keys(gameState).forEach((key) => {
-    encryptedGameState[key] = gameState[key] ^ key.charCodeAt(0);
+  Object.keys(gameState).forEach((k) => {
+    if (Array.isArray(gameState[k])) {
+      encryptedGameState[k] = JSON.stringify(gameState[k]);
+    } else {
+      encryptedGameState[k] = gameState[k] ^ parseInt(key, 10);
+    }
   });
   return encryptedGameState;
 };
 
 const decryptGameState = (encryptedGameState, key) => {
   const decryptedGameState = {};
-  Object.keys(encryptedGameState).forEach((key) => {
-    decryptedGameState[key] = encryptedGameState[key] ^ key.charCodeAt(0);
+  Object.keys(encryptedGameState).forEach((k) => {
+    if (Array.isArray(encryptedGameState[k])) {
+      decryptedGameState[k] = JSON.parse(encryptedGameState[k]);
+    } else {
+      decryptedGameState[k] = encryptedGameState[k] ^ parseInt(key, 10);
+    }
   });
   return decryptedGameState;
 };
 
-const generateSecretKey = () => {
-  const keyPart1 = "mySecretKey".charCodeAt(0) + Math.random() * 100;
-  const keyPart2 = (new Date().getTime() % 1000) + 123;
-  return String.fromCharCode(keyPart1) + String.fromCharCode(keyPart2);
+const getSavedGameState = () => {
+  try {
+    const savedState = JSON.parse(localStorage.getItem("game_state"));
+    if (
+      savedState &&
+      typeof savedState.playerScore === "number" &&
+      typeof savedState.computerScore === "number" &&
+      typeof savedState.currentRound === "number" &&
+      typeof savedState.maxRounds === "number"
+    ) {
+      return savedState;
+    }
+  } catch (error) {
+    console.error("Invalid game state data:", error);
+  }
+  return null;
 };
 
 const gameLoop = () => {
@@ -97,8 +128,6 @@ const gameLoop = () => {
         gamesWon: 0,
         isRoundInProgress: false,
       };
-      const encryptedGameState = encryptGameState(game_state, secretKey);
-      localStorage.setItem("game_state", JSON.stringify(encryptedGameState));
     }
   } else {
     // Only show the welcome prompt if there's no existing game state
@@ -109,11 +138,11 @@ const gameLoop = () => {
       console.log("Game canceled by the user.");
       return;
     }
-
-    // Save the initial game state
-    const encryptedGameState = encryptGameState(game_state, secretKey);
-    localStorage.setItem("game_state", JSON.stringify(encryptedGameState));
   }
+
+  // Save the initial game state
+  const encryptedGameState = encryptGameState(game_state, secretKey);
+  localStorage.setItem("game_state", JSON.stringify(encryptedGameState));
 
   while (game_state.currentRound <= game_state.maxRounds) {
     console.log(
@@ -131,6 +160,7 @@ const gameLoop = () => {
       );
       if (playerSelection === null || playerSelection.toLowerCase() === "q") {
         console.log("Game exited by the user.");
+        localStorage.removeItem("game_state");
         return;
       }
       result = Round(computerPlay(), playerSelection);
@@ -183,8 +213,6 @@ const gameLoop = () => {
       }`
     );
   }
-
-  console.log(`You have won ${game_state.gamesWon} games so far.`);
 
   // Reset the game state
   localStorage.removeItem("game_state");
