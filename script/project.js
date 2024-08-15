@@ -160,7 +160,7 @@ const gameLoop = () => {
       );
       if (playerSelection === null || playerSelection.toLowerCase() === "q") {
         console.log("Game exited by the user.");
-        localStorage.removeItem("game_state");
+        // localStorage.removeItem("game_state");
         return;
       }
       result = Round(computerPlay(), playerSelection);
