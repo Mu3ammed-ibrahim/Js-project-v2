@@ -1,3 +1,10 @@
+//validation for input
+const sanitizeInput = (input) => {
+  const validChoices = ["rock", "paper", "scissor"];
+  input = input.toLowerCase().trim();
+  return validChoices.includes(input) ? input : "invalid";
+};
+
 const computerPlay = function () {
   const rock_paper_scissors = ["Rock", "Paper", "Scissor"];
   const computer_pick = Math.floor(Math.random() * rock_paper_scissors.length);
@@ -5,9 +12,10 @@ const computerPlay = function () {
 };
 
 const Round = function (computerSelection, playerSelection) {
-  playerSelection = playerSelection.toLowerCase();
-  let result;
+  playerSelection = sanitizeInput(playerSelection);
+  if (playerSelection === "invalid") return "invalid";
 
+  let result;
   if (playerSelection === "rock") {
     result =
       computerSelection === "Scissor"
@@ -34,6 +42,25 @@ const Round = function (computerSelection, playerSelection) {
   }
 
   return result;
+};
+//Avoid storing sensitive or critical data.
+//Validate and sanitize the retrieved data before using it.
+const getSavedGameState = () => {
+  try {
+    const savedState = JSON.parse(localStorage.getItem("game_state"));
+    if (
+      savedState &&
+      typeof savedState.playerScore === "number" &&
+      typeof savedState.computerScore === "number" &&
+      typeof savedState.currentRound === "number" &&
+      typeof savedState.maxRounds === "number"
+    ) {
+      return savedState;
+    }
+  } catch (error) {
+    console.error("Invalid game state data:", error);
+  }
+  return null;
 };
 
 const gameLoop = () => {
@@ -126,10 +153,8 @@ const gameLoop = () => {
   } else {
     console.log("It's a tie!");
   }
-
   // Reset the game state
   localStorage.removeItem("game_state");
 };
-
 // Start or resume the game
 gameLoop();
