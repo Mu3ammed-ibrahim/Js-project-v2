@@ -64,6 +64,11 @@ const gameLoop = () => {
     computerScore: 0,
     currentRound: 1,
     maxRounds: 5,
+    playerChoices: [],
+    computerChoices: [],
+    roundResults: [],
+    gamesWon: 0,
+    isRoundInProgress: false,
   };
 
   const secretKey = generateSecretKey();
@@ -86,6 +91,11 @@ const gameLoop = () => {
         computerScore: 0,
         currentRound: 1,
         maxRounds: 5,
+        playerChoices: [],
+        computerChoices: [],
+        roundResults: [],
+        gamesWon: 0,
+        isRoundInProgress: false,
       };
       const encryptedGameState = encryptGameState(game_state, secretKey);
       localStorage.setItem("game_state", JSON.stringify(encryptedGameState));
@@ -113,6 +123,8 @@ const gameLoop = () => {
     let playerSelection;
     let result;
 
+    game_state.isRoundInProgress = true;
+
     do {
       playerSelection = prompt(
         `Enter your choice for round number ${game_state.currentRound} (Rock, Paper, or Scissor) or press "q" to quit`
@@ -128,6 +140,10 @@ const gameLoop = () => {
       }
     } while (result === "invalid");
 
+    game_state.playerChoices.push(playerSelection);
+    game_state.computerChoices.push(computerPlay());
+    game_state.roundResults.push(result);
+
     if (result === "win") {
       game_state.playerScore++;
     } else if (result === "lose") {
@@ -139,22 +155,36 @@ const gameLoop = () => {
       `Current score: \nPlayer: ${game_state.playerScore}\nComputer: ${game_state.computerScore}`
     );
 
+    game_state.isRoundInProgress = false;
+
     game_state.currentRound++;
     const encryptedGameState = encryptGameState(game_state, secretKey);
     localStorage.setItem("game_state", JSON.stringify(encryptedGameState));
   }
 
-  // Final results
-  console.log(
-    `Final score - Player: ${game_state.playerScore}, Computer: ${game_state.computerScore}`
-  );
+  // Check if the player won the game
   if (game_state.playerScore > game_state.computerScore) {
-    console.log("Congratulations! You are the overall winner!");
+    game_state.gamesWon++;
+    console.log("Congratulations! You won the game!");
   } else if (game_state.playerScore < game_state.computerScore) {
-    console.log("Sorry! The computer is the overall winner.");
+    console.log("Sorry! The computer won the game.");
   } else {
     console.log("It's a tie!");
   }
+
+  // Display game summary
+  console.log("Game summary:");
+  for (let i = 0; i < game_state.roundResults.length; i++) {
+    console.log(
+      `Round ${i + 1}: You chose ${
+        game_state.playerChoices[i]
+      }, Computer chose ${game_state.computerChoices[i]}, Result: ${
+        game_state.roundResults[i]
+      }`
+    );
+  }
+
+  console.log(`You have won ${game_state.gamesWon} games so far.`);
 
   // Reset the game state
   localStorage.removeItem("game_state");
