@@ -84,7 +84,15 @@ const gameLoop = () => {
     isRoundInProgress: false,
   };
 
-  const secretKey = generateSecretKey();
+  let secretKey;
+
+  // Load secret key from localStorage if available
+  if (localStorage.getItem("secret_key")) {
+    secretKey = localStorage.getItem("secret_key");
+  } else {
+    secretKey = generateSecretKey();
+    localStorage.setItem("secret_key", secretKey);
+  }
 
   // Load game state from localStorage if available
   if (localStorage.getItem("game_state")) {
@@ -142,7 +150,7 @@ const gameLoop = () => {
       );
       if (playerSelection === null || playerSelection.toLowerCase() === "q") {
         console.log("Game exited by the user.");
-        // localStorage.removeItem
+        localStorage.removeItem("game_state");
         return;
       }
       result = Round(computerPlay(), playerSelection);
@@ -196,7 +204,7 @@ const gameLoop = () => {
     );
   }
 
-  // Reset the game state
+  // Reset the game state (optional, if you want to clear localStorage)
   localStorage.removeItem("game_state");
 };
 
