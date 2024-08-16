@@ -71,24 +71,6 @@ const decryptGameState = (encryptedGameState, key) => {
   return decryptedGameState;
 };
 
-const getSavedGameState = () => {
-  try {
-    const savedState = JSON.parse(localStorage.getItem("game_state"));
-    if (
-      savedState &&
-      typeof savedState.playerScore === "number" &&
-      typeof savedState.computerScore === "number" &&
-      typeof savedState.currentRound === "number" &&
-      typeof savedState.maxRounds === "number"
-    ) {
-      return savedState;
-    }
-  } catch (error) {
-    console.error("Invalid game state data:", error);
-  }
-  return null;
-};
-
 const gameLoop = () => {
   let game_state = {
     playerScore: 0,
@@ -160,7 +142,7 @@ const gameLoop = () => {
       );
       if (playerSelection === null || playerSelection.toLowerCase() === "q") {
         console.log("Game exited by the user.");
-        // localStorage.removeItem("game_state");
+        // localStorage.removeItem
         return;
       }
       result = Round(computerPlay(), playerSelection);
